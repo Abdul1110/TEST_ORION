@@ -1,0 +1,40 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      docker: 18
+  pre_build:
+    commands:
+      - echo Restore started on `date`
+      - echo "CODEBUILD_RESOLVED_SOURCE_VERSION $CODEBUILD_RESOLVED_SOURCE_VERSION"
+      - echo "CODEBUILD_BUILD_SUCCEEDING $CODEBUILD_BUILD_SUCCEEDING"
+      - echo "CODEBUILD_SOURCE_VERSION $CODEBUILD_SOURCE_VERSION"
+      - pip install --upgrade awscli
+      - export ECR_REPO=`echo $ECR_REPO | tr "[:upper:]" "[:lower:]"`
+      - export IMAGE_TAG="$CODEBUILD_RESOLVED_SOURCE_VERSION"
+      - DOCKER_TARGET_PARAM=`echo $BUILD_ARGS | awk -F '=' '{print $2}'`
+      - IMAGE_TAG=`echo $IMAGE_TAG | awk '{print substr ($0, 0, 10)}'`
+      - IMAGE_TAG="$IMAGE_TAG""_""$DOCKER_TARGET_PARAM"
+      - echo $IMAGE_TAG > imageVersion
+      - echo "IMAGE_TAG $IMAGE_TAG"
+      - export BRANCH_NAME=$BRANCH_ENV
+      - PARAMETER_VALUE=$(aws ssm get-parameter --name lawconnectapp$DOCKER_TARGET_PARAM --with-decryption --output=text)
+      - REDIS=`echo $PARAMETER_VALUE | awk '{split($0, a, "\"redis\":\ \""); split(a[2], b, "\""); print b[1];}'`
+      - echo "REDIS $REDIS"
+      - COOKIE_SECRET=`echo $PARAMETER_VALUE | awk '{split($0, a, "\"cookieSecret\":\ \""); split(a[2], b, "\","); print b[1];}'`
+      - echo "COOKIE_SECRET $COOKIE_SECRET"
+      - AUTH_CLIENT_SECRET=`echo $PARAMETER_VALUE | awk '{split($0, a, "\"authClientSecret\":\ \""); split(a[2], b, "\","); print b[1];}'`
+      - echo "AUTH_CLIENT_SECRET $AUTH_CLIENT_SECRET"
+      - aws s3 cp imageVersion s3://docker-file-configs/configs/$PIPELINE_NAME/$BRANCH_NAME/imageVersion
+      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Docker Build started on `date`
+      - echo Building the Docker image...
+      - docker build --build-arg SOURCE_VERSION=$CODEBUILD_RESOLVED_SOURCE_VERSION --build-arg BRANCH_NAME=$BRANCH_NAME --build-arg target=$DOCKER_TARGET_PARAM --build-arg REDIS=$REDIS --build-arg COOKIE_SECRET=$COOKIE_SECRET --build-arg AUTH_CLIENT_SECRET=$AUTH_CLIENT_SECRET -t tempbuild:latest .
+  post_build:
+    commands:
+      - aws s3 cp s3://docker-file-configs/configs/scripts/push_image_universal.sh .
+      - chmod a+x push_image_universal.sh
+      - ./push_image_universal.sh
