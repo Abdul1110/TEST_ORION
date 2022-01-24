@@ -1,4 +1,11 @@
 # Starter pipeline
+- task: Application security testing@2022
+  inputs:
+    projectName: 'TEST_Azure'
+    enableProxy: false
+    enableSastScan: true
+    CheckmarxService: 'CxSAST 9.0'
+    enableDependencyScan: false
 # Start with a minimal pipeline that you can customize to build and deploy your code.
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
