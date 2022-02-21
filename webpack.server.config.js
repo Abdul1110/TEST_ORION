@@ -8,6 +8,7 @@ module.exports = {
     alias: {
       hiredis: path.join(__dirname, 'server/aliases/hiredis.js')
     }
+    //test
   },
   target: 'node',
   mode: 'none',
