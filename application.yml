@@ -1,0 +1,48 @@
+server:
+  port: 8080
+logging:
+  file: flow.log
+
+cxflow:
+  bug-tracker: GitHub
+  bug-tracker-impl:
+  - GitHub
+  branches:
+  - master
+  filter-severity:
+  - High
+  - Medium
+  filter-category:
+  #- SQL_Injection
+  #- Stored_XSS
+  #- Reflected_XSS_All_Clients
+  filter-cwe:
+  filter-status:
+  #   - Urgent
+  #   - Confirmed
+  #mitre-url: https://cwe.mitre.org/data/definitions/%s.html
+  #wiki-url: https://custodela.atlassian.net/wiki/spaces/AS/pages/79462432/Remediation+Guidance
+  codebash-url: https://checkmarx-demo.codebashing.com/courses/
+
+checkmarx:
+  version: 9.0
+  username: abdul
+  password: Abd@1234!
+  client-secret: 014DF517-39D1-4453-B7B3-9930C563627C
+  base-url: http://2de8-180-148-47-146.ngrok.io
+  team: CxServer
+  url: ${checkmarx.base-url}/cxrestapi
+  #WSDL Config
+  portal-url: $ http://2de8-180-148-47-146.ngrok.io/cxwebinterface/Portal/CxWebService.asmx
+  sdk-url: $ http://2de8-180-148-47-146.ngrok.io/cxwebinterface/SDK/CxSDKWebService.asmx
+  portal-wsdl: $ http://2de8-180-148-47-146.ngrok.io/Portal/CxWebService.asmx?wsdl
+  sdk-wsdl: $ http://2de8-180-148-47-146.ngrok.io/SDK/CxSDKWebService.asmx?wsdl
+
+
+github:
+  webhook-token: 12345
+  token: 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
+  url: https://github.com
+  api-url: https://api.github.com/repos/
+  false-positive-label: false-positive
+  block-merge: true
